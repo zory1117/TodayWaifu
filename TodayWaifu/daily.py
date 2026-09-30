@@ -644,7 +644,7 @@ async def _send_wife_list(bot: Bot, ev: Event, mode: str = 'wife') -> None:
 
 
 @specify_wife_sv.on_prefix(
-    ('今日老婆', '娶婆娘', 'jrlp', 'qlp'),
+    ('今日老婆', '今日老婆 ', '娶婆娘', 'jrlp', 'qlp'),
     block=True,
     to_ai="""抽取当前用户今天的老婆。
     当用户说“今日老婆”“帮我娶个老婆”“我今天的老婆是谁”时调用。

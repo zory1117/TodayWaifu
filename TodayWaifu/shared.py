@@ -351,8 +351,12 @@ def _can_assign_wife(ev: Event) -> bool:
 
 
 def _can_specify_wife(ev: Event) -> bool:
-    return _is_master(ev) or str(ev.user_id) in normalized_user_ids(
-        _cfg('DailyWifeSpecifyWhitelist')
+    return _is_master(ev) or can_use_pm_or_whitelisted_feature(
+        ev.user_id,
+        ev.user_pm,
+        specify_wife_sv.pm,
+        (),
+        _cfg('DailyWifeSpecifyWhitelist'),
     )
 
 
