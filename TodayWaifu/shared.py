@@ -215,7 +215,11 @@ from .role_quotes import get_role_quote
 from .invalidation import _invalidate_candidate_cache
 from .source_cache import AsyncSourceCache
 from .kind_metadata import DAILY_KIND_METADATA, DailyKindMetadata
-from .upload_access import can_upload_images, normalized_user_ids, can_use_whitelisted_feature
+from .upload_access import (
+    can_upload_images,
+    normalized_user_ids,
+    can_use_pm_or_whitelisted_feature,
+)
 from .role_map_store import loads_role_map, write_role_map, migrate_legacy_text_map
 from .circuit_breaker import CircuitBreaker
 from .daily_repository import ContextKey, ContextRegistry
@@ -337,16 +341,22 @@ def _can_upload_images(ev: Event) -> bool:
 
 
 def _can_assign_wife(ev: Event) -> bool:
-    return _is_master(ev) or can_use_whitelisted_feature(
+    return _is_master(ev) or can_use_pm_or_whitelisted_feature(
         ev.user_id,
+        ev.user_pm,
+        assign_wife_sv.pm,
         (),
         _cfg('DailyWifeAssignWhitelist'),
     )
 
 
 def _can_specify_wife(ev: Event) -> bool:
-    return _is_master(ev) or str(ev.user_id) in normalized_user_ids(
-        _cfg('DailyWifeSpecifyWhitelist')
+    return _is_master(ev) or can_use_pm_or_whitelisted_feature(
+        ev.user_id,
+        ev.user_pm,
+        specify_wife_sv.pm,
+        (),
+        _cfg('DailyWifeSpecifyWhitelist'),
     )
 
 

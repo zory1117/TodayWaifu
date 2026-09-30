@@ -47,13 +47,34 @@ class AssignWifeAccessTests(unittest.TestCase):
         access = _load_upload_access()
         self.assertTrue(access.can_use_whitelisted_feature('10002', [], '10001, 10002\n10003'))
 
+    def test_service_permission_level_allows_authorized_user(self) -> None:
+        access = _load_upload_access()
+        self.assertTrue(access.can_use_pm_or_whitelisted_feature('10001', 3, 3, [], []))
+
+    def test_service_permission_level_rejects_lower_priority_user(self) -> None:
+        access = _load_upload_access()
+        self.assertFalse(access.can_use_pm_or_whitelisted_feature('10001', 6, 3, [], []))
+
+    def test_whitelist_still_overrides_service_permission_level(self) -> None:
+        access = _load_upload_access()
+        self.assertTrue(access.can_use_pm_or_whitelisted_feature('10001', 6, 3, [], ['10001']))
+
     def test_assign_gate_uses_assign_whitelist(self) -> None:
         gate = _function_source('TodayWaifu/shared.py', '_can_assign_wife')
         self.assertIn('_is_master(ev)', gate)
         self.assertIn('DailyWifeAssignWhitelist', gate)
+        self.assertIn('ev.user_pm', gate)
+        self.assertIn('assign_wife_sv.pm', gate)
 
     def test_assign_gate_is_exported_for_submodules(self) -> None:
         self.assertIn("'_can_assign_wife'", _source('TodayWaifu/shared.py'))
+
+    def test_specify_gate_uses_service_permission_level(self) -> None:
+        gate = _function_source('TodayWaifu/shared.py', '_can_specify_wife')
+        self.assertIn('_is_master(ev)', gate)
+        self.assertIn('ev.user_pm', gate)
+        self.assertIn('specify_wife_sv.pm', gate)
+        self.assertIn('DailyWifeSpecifyWhitelist', gate)
 
     def test_assign_handler_uses_whitelist_gate(self) -> None:
         handler = _function_source('TodayWaifu/daily.py', '_send_assign_wife')
